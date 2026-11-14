@@ -4,6 +4,7 @@
   var S = (window.Signals = {});
   var WD = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WPM = 220; // reading speed used for every time estimate
 
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
@@ -13,11 +14,17 @@
     if (text != null) e.textContent = text;
     return e;
   }
+  function words(t) { var m = (t || '').trim().match(/\S+/g); return m ? m.length : 0; }
+  function minsFor(w) { return Math.max(1, Math.round(w / WPM)); }
   function parseDate(s) {
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
     if (!m) return null;
     var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
     return { y: +m[1], m: +m[2] - 1, d: +m[3], wd: d.getUTCDay() };
+  }
+  function todayStr() {
+    var n = new Date(), p = function (x) { return (x < 10 ? '0' : '') + x; };
+    return n.getFullYear() + '-' + p(n.getMonth() + 1) + '-' + p(n.getDate());
   }
   function safeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : null; }
   function splitFront(t) {
@@ -50,6 +57,7 @@
   }
   var ICON_EXT = 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5';
   var ICON_DOWN = 'M6 9l6 6 6-6';
+  var ICON_RIGHT = 'M9 6l6 6-6 6';
 
   function markdownToHtml(text) {
     if (!window.marked || !window.DOMPurify) return null; // fail closed: never inject unsanitized HTML
@@ -62,8 +70,13 @@
     m.appendChild(el('i')); m.appendChild(el('i')); m.appendChild(el('i'));
     return m;
   }
+  function isTyping(e) {
+    var t = e.target, tag = t && t.tagName;
+    return e.ctrlKey || e.metaKey || e.altKey || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable);
+  }
+  function reducedMotion() { return window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; }
 
-  /* ---------- theme + progress ---------- */
+  /* ---------- shared chrome: theme, progress, minutes left, shortcuts ---------- */
   S.initChrome = function () {
     var b = $('#theme-toggle');
     if (b) {
@@ -74,25 +87,34 @@
         b.setAttribute('aria-label', 'Switch to ' + (next === 'dark' ? 'light' : 'dark') + ' theme');
       });
     }
-    var bar = $('#progress');
-    if (bar) {
-      var tick = function () {
-        var h = document.documentElement;
-        var max = h.scrollHeight - h.clientHeight;
-        bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, h.scrollTop / max) : 0) + ')';
-      };
-      window.addEventListener('scroll', tick, { passive: true });
-      tick();
-    }
+    var bar = $('#progress'), tl = $('#timeleft');
+    S.tick = function () {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var f = max > 0 ? Math.min(1, Math.max(0, h.scrollTop / max)) : 0;
+      if (bar) bar.style.transform = 'scaleX(' + f + ')';
+      if (tl && S.totalMinutes) {
+        tl.textContent = f > 0.985 ? 'Finished' : Math.max(1, Math.ceil(S.totalMinutes * (1 - f))) + ' min left';
+      }
+    };
+    window.addEventListener('scroll', S.tick, { passive: true });
+    window.addEventListener('resize', S.tick);
+    S.tick();
+    document.addEventListener('keydown', function (e) {
+      if (e.key === '/' && !isTyping(e)) {
+        var s = $('#search');
+        if (s) { e.preventDefault(); s.focus(); }
+      }
+    });
   };
 
   /* ---------- day page ---------- */
   function parseMeta(txt) {
-    var parts = txt.split(/\s*[·•|]\s*/).filter(Boolean);
+    var parts = txt.split(/\s*[\u00B7\u2022|]\s*/).filter(Boolean);
     var meta = { source: '', time: '', tag: '' };
     parts.forEach(function (p, i) {
       if (/\bmin\b/i.test(p)) meta.time = p;
-      else if (/^(lead|core|need to know|discovery)$/i.test(p)) meta.tag = p.toLowerCase();
+      else if (/^(lead|core|need to know|discovery|worth knowing)$/i.test(p)) meta.tag = p.toLowerCase();
       else if (i === 0) meta.source = p;
     });
     return meta;
@@ -110,7 +132,7 @@
         if (!found) found = safeUrl(a.getAttribute('href'));
         var p = a.parentNode;
         p.removeChild(a);
-        if (p.tagName === 'P' && !p.textContent.replace(/[\s.\[\]()]/g, '')) p.parentNode && p.parentNode.removeChild(p);
+        if (p.tagName === 'P' && !p.textContent.replace(/[\s.\[\]()]/g, '') && p.parentNode) p.parentNode.removeChild(p);
       }
     });
     return found;
@@ -166,16 +188,18 @@
     normalizeParagraphs(holder);
     var link = pullOriginalLink(holder);
 
-    var meta = { source: '', time: '', tag: '' }, verdictTxt = '', body = [];
+    var meta = { source: '', time: '', tag: '' }, verdictTxt = '', body = [], bodyWords = 0;
     Array.prototype.slice.call(holder.children).forEach(function (n) {
       var txt = n.textContent.trim();
       if (n.tagName === 'P') {
         if (!meta.source && !meta.time && n.children.length === 1 && n.firstElementChild.tagName === 'EM' &&
-            txt === n.firstElementChild.textContent.trim() && /[·•|]/.test(txt)) { meta = parseMeta(txt); return; }
+            txt === n.firstElementChild.textContent.trim() && /[\u00B7\u2022|]/.test(txt)) { meta = parseMeta(txt); return; }
         if (/^verdict\s*:/i.test(txt) && !verdictTxt) { verdictTxt = txt.replace(/^verdict\s*:\s*/i, '').trim(); return; }
       }
+      bodyWords += words(txt);
       body.push(n);
     });
+    var mins = bodyWords ? minsFor(bodyWords) : (parseInt(meta.time, 10) || 1);
 
     var tagCls = /need/.test(meta.tag) ? 'tag-need' : /discover/.test(meta.tag) ? 'tag-disc' : '';
     var sec = el('section', 'story' + (isLead ? ' lead' : '') + (tagCls ? ' ' + tagCls : ''));
@@ -186,10 +210,10 @@
 
     var tags = el('div', 'story-tags');
     if (meta.source) tags.appendChild(el('span', 'pill', meta.source));
-    if (meta.time) tags.appendChild(el('span', 'pill', meta.time));
+    tags.appendChild(el('span', 'pill', mins + ' min read'));
     if (/need/.test(meta.tag)) tags.appendChild(el('span', 'pill need', 'Need to know'));
     if (/discover/.test(meta.tag)) tags.appendChild(el('span', 'pill disc', 'Discovery'));
-    if (tags.children.length) main.appendChild(tags);
+    main.appendChild(tags);
 
     main.appendChild(el('h2', 'story-title', title));
 
@@ -197,6 +221,8 @@
     var moreEl = el('div', 'story-more prose');
     body.forEach(function (n, i) { (isLead || i === 0 ? bodyEl : moreEl).appendChild(n); });
     main.appendChild(bodyEl);
+
+    var api = { setOpen: null, toggle: null, isOpen: function () { return false; } };
     if (moreEl.children.length) {
       moreEl.hidden = true;
       moreEl.id = 'more-' + num;
@@ -207,12 +233,14 @@
       var label = el('span', null, 'Read more');
       btn.appendChild(label);
       btn.appendChild(svgIcon(ICON_DOWN));
-      btn.addEventListener('click', function () {
-        var open = btn.getAttribute('aria-expanded') === 'true';
-        btn.setAttribute('aria-expanded', String(!open));
-        moreEl.hidden = open;
-        label.textContent = open ? 'Read more' : 'Show less';
-      });
+      api.setOpen = function (open) {
+        btn.setAttribute('aria-expanded', String(open));
+        moreEl.hidden = !open;
+        label.textContent = open ? 'Show less' : 'Read more';
+      };
+      api.isOpen = function () { return !moreEl.hidden; };
+      api.toggle = function () { api.setOpen(moreEl.hidden); };
+      btn.addEventListener('click', api.toggle);
       main.appendChild(moreEl);
       main.appendChild(btn);
     }
@@ -240,7 +268,8 @@
     }
     if (foot.children.length) main.appendChild(foot);
 
-    return { node: sec, num: num, title: title, source: meta.source, level: level, tag: tagCls };
+    return { node: sec, num: num, title: title, source: meta.source, mins: mins, level: level, tag: tagCls,
+             isTagged: meta.tag, setOpen: api.setOpen, toggle: api.toggle, isOpen: api.isOpen };
   }
   function buildQuick(g) {
     var sec = el('section', 'block');
@@ -266,13 +295,91 @@
   }
   function buildBlock(g, cls) {
     var sec = el('section', cls);
-    var title = el('h2', 'block-title', g.head.textContent.trim());
-    sec.appendChild(title);
+    sec.appendChild(el('h2', 'block-title', g.head.textContent.trim()));
     var p = el('div', 'prose');
     g.nodes.forEach(function (n) { p.appendChild(n); });
     $$('a', p).forEach(function (a) { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
     sec.appendChild(p);
     return sec;
+  }
+  function buildToc(stories) {
+    var toc = el('nav', 'toc');
+    toc.setAttribute('aria-label', 'In this issue');
+    toc.setAttribute('data-open', 'false');
+    var head = el('button', 'toc-head');
+    head.type = 'button';
+    head.setAttribute('aria-expanded', 'false');
+    head.setAttribute('aria-controls', 'toc-list');
+    head.appendChild(el('span', null, 'In this issue'));
+    head.appendChild(el('span', 'toc-count', stories.length + (stories.length === 1 ? ' story' : ' stories')));
+    head.appendChild(svgIcon(ICON_DOWN));
+    var ol = el('ol', 'toc-list');
+    ol.id = 'toc-list';
+    var links = [];
+    stories.forEach(function (s) {
+      var li = el('li');
+      var a = el('a'); a.href = '#s' + s.num;
+      a.appendChild(el('span', 'toc-n', s.num));
+      var t = el('span');
+      t.appendChild(el('span', 'toc-t', s.title));
+      var sub = [s.source, s.mins + ' min', /need/.test(s.tag) ? 'Need to know' : /disc/.test(s.tag) ? 'Discovery' : ''].filter(Boolean).join(', ');
+      t.appendChild(el('span', 'toc-s', sub));
+      a.appendChild(t);
+      a.appendChild(s.level ? meter(s.level) : el('span'));
+      li.appendChild(a); ol.appendChild(li); links.push(a);
+    });
+    toc.appendChild(head);
+    toc.appendChild(ol);
+    var mq = window.matchMedia ? matchMedia('(min-width: 1100px)') : null;
+    function sync() {
+      var wide = mq && mq.matches;
+      head.tabIndex = wide ? -1 : 0;
+      if (wide) head.removeAttribute('aria-expanded'); else head.setAttribute('aria-expanded', toc.getAttribute('data-open'));
+    }
+    head.addEventListener('click', function () {
+      if (mq && mq.matches) return;
+      var open = toc.getAttribute('data-open') !== 'true';
+      toc.setAttribute('data-open', String(open));
+      head.setAttribute('aria-expanded', String(open));
+    });
+    if (mq && mq.addEventListener) mq.addEventListener('change', sync);
+    sync();
+    // tapping an item on a phone closes the index so the story is visible
+    links.forEach(function (a) {
+      a.addEventListener('click', function () {
+        if (!(mq && mq.matches)) { toc.setAttribute('data-open', 'false'); head.setAttribute('aria-expanded', 'false'); }
+      });
+    });
+    return { node: toc, links: links };
+  }
+  function scrollspy(stories, links) {
+    if (!('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (l) {
+          if (l.getAttribute('href') === '#' + en.target.id) l.setAttribute('aria-current', 'true');
+          else l.removeAttribute('aria-current');
+        });
+      });
+    }, { rootMargin: '-18% 0px -72% 0px' });
+    stories.forEach(function (s) { io.observe(s.node); });
+  }
+  function shortcuts(stories) {
+    document.addEventListener('keydown', function (e) {
+      if (isTyping(e) || (e.key !== 'j' && e.key !== 'k' && e.key !== 'e')) return;
+      var idx = -1;
+      stories.forEach(function (s, i) { if (s.node.getBoundingClientRect().top <= 120) idx = i; });
+      if (e.key === 'e') { if (idx >= 0 && stories[idx].toggle) stories[idx].toggle(); return; }
+      var target;
+      if (e.key === 'j') target = Math.min(stories.length - 1, idx + 1);
+      else {
+        var atTop = idx >= 0 && Math.abs(stories[idx].node.getBoundingClientRect().top - 76) < 28;
+        target = atTop ? idx - 1 : idx;
+      }
+      if (target < 0) { window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' }); return; }
+      stories[target].node.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+    });
   }
 
   S.renderDay = function (mdPath) {
@@ -318,12 +425,13 @@
       }
       if (summary) head.appendChild(el('p', 'issue-summary', summary.textContent.trim()));
 
-      var stories = [], body = el('div');
+      var stories = [], body = el('div'), sourcesSeen = [];
       groups.forEach(function (g) {
         var kind = classify(g);
         if (kind === 'story') {
           var s = buildStory(g, stories.length === 0);
           stories.push(s);
+          if (s.source && sourcesSeen.indexOf(s.source) === -1) sourcesSeen.push(s.source);
           body.appendChild(s.node);
         } else if (kind === 'quick') body.appendChild(buildQuick(g));
         else if (kind === 'long') body.appendChild(buildBlock(g, 'longread'));
@@ -336,38 +444,53 @@
         }
       });
 
-      var words = (body.textContent || '').split(/\s+/).length;
+      var total = minsFor(words(body.textContent));
+      S.totalMinutes = total;
       var pills = el('div', 'pills');
+      pills.appendChild(el('span', 'pill strong', total + ' min read'));
       pills.appendChild(el('span', 'pill', stories.length + (stories.length === 1 ? ' story' : ' stories')));
-      pills.appendChild(el('span', 'pill', Math.max(1, Math.round(words / 220)) + ' min read'));
       if (/^(24|48)h?$/i.test(fm.window || '')) pills.appendChild(el('span', 'pill', 'Last ' + parseInt(fm.window, 10) + ' hours'));
       head.appendChild(pills);
-
-      if (stories.length) {
-        var toc = el('nav', 'toc');
-        toc.setAttribute('aria-label', 'In this issue');
-        toc.appendChild(el('div', 'toc-title', 'In this issue'));
-        var ol = el('ol');
-        stories.forEach(function (s) {
-          var li = el('li');
-          var a = el('a'); a.href = '#s' + s.num;
-          a.appendChild(el('span', 'toc-n', s.num));
-          var t = el('span');
-          t.appendChild(el('span', 'toc-t', s.title));
-          var sub = [s.source, /need/.test(s.tag) ? 'Need to know' : /disc/.test(s.tag) ? 'Discovery' : ''].filter(Boolean).join(', ');
-          if (sub) t.appendChild(el('span', 'toc-s', sub));
-          a.appendChild(t);
-          if (s.level) a.appendChild(meter(s.level));
-          li.appendChild(a); ol.appendChild(li);
-        });
-        toc.appendChild(ol);
-        head.appendChild(toc);
-      }
       root.appendChild(head);
-      root.appendChild(body);
+
+      var layout = el('div', 'layout');
+      var rail = el('aside', 'rail');
+      var main = el('div', 'main');
+      layout.appendChild(rail);
+      layout.appendChild(main);
+      root.appendChild(layout);
+
+      var toc = null;
+      if (stories.length) {
+        toc = buildToc(stories);
+        rail.appendChild(toc.node);
+      } else rail.hidden = true;
+
+      var expandable = stories.filter(function (s) { return s.setOpen; });
+      if (expandable.length) {
+        var tools = el('div', 'reader-tools');
+        var allBtn = el('button', 'chip-btn', 'Expand all');
+        allBtn.type = 'button';
+        var allOpen = false;
+        allBtn.addEventListener('click', function () {
+          allOpen = !allOpen;
+          expandable.forEach(function (s) { s.setOpen(allOpen); });
+          allBtn.textContent = allOpen ? 'Collapse all' : 'Expand all';
+        });
+        tools.appendChild(allBtn);
+        main.appendChild(tools);
+      }
+      main.appendChild(body);
+
+      if (sourcesSeen.length) {
+        var src = el('p', 'sources');
+        src.appendChild(el('b', null, 'Sources in this issue'));
+        src.appendChild(document.createTextNode(sourcesSeen.join(', ')));
+        main.appendChild(src);
+      }
 
       var pager = el('div', 'pager');
-      root.appendChild(pager);
+      main.appendChild(pager);
       fetch('../manifest.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (list) {
         list = list.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
         var i = -1;
@@ -382,6 +505,10 @@
         if (i > 0) link(list[i - 1], 'next', 'Next issue');
         if (!pager.children.length) pager.remove();
       }).catch(function () { pager.remove(); });
+
+      if (toc) scrollspy(stories, toc.links);
+      shortcuts(stories);
+      if (S.tick) S.tick();
     }).catch(function () {
       root.textContent = '';
       root.appendChild(el('div', 'state', 'This issue could not be loaded. Check your connection and refresh. If it keeps failing, the digest file may not be published yet.'));
@@ -398,7 +525,7 @@
   }
   S.renderHome = function () {
     S.initChrome();
-    var list = $('#list'), tabs = $('#tabs'), search = $('#search');
+    var list = $('#list'), tabs = $('#tabs'), search = $('#search'), stats = $('#stats');
     var site = DEFAULT_SITE, section = null, entries = [];
 
     function entryUrl(e) { return e.url || (section.base || '') + e.date + '/'; }
@@ -410,6 +537,13 @@
       r.appendChild(document.createTextNode(MO[pd.m] + ' ' + pd.y));
       f.appendChild(r);
       return f;
+    }
+    function drawStats() {
+      stats.textContent = '';
+      if (!entries.length) return;
+      var oldest = parseDate(entries[entries.length - 1].date);
+      stats.appendChild(el('span', 'pill', entries.length + (entries.length === 1 ? ' issue' : ' issues')));
+      if (oldest) stats.appendChild(el('span', 'pill', 'Since ' + MO[oldest.m].slice(0, 3) + ' ' + oldest.y));
     }
     function draw() {
       var q = (search.value || '').trim().toLowerCase();
@@ -426,7 +560,7 @@
         var f = el('a', 'feature'); f.href = entryUrl(first);
         var top = el('div', 'feature-top');
         top.appendChild(dateBlock(fpd));
-        top.appendChild(el('span', 'feature-badge', 'Latest issue'));
+        top.appendChild(el('span', 'feature-badge', first.date === todayStr() ? 'Today\u2019s issue' : 'Latest issue'));
         f.appendChild(top);
         f.appendChild(el('h2', 'feature-lead', first.lead || first.title || first.date));
         if ((first.one_liners || []).length) {
@@ -434,6 +568,14 @@
           first.one_liners.slice(0, 5).forEach(function (x) { ul.appendChild(el('li', null, x)); });
           f.appendChild(ul);
         }
+        var ff = el('div', 'feature-foot');
+        if (first.minutes) ff.appendChild(el('span', 'pill', first.minutes + ' min read'));
+        if (first.stories) ff.appendChild(el('span', 'pill', first.stories + ' stories'));
+        var cta = el('span', 'feature-cta');
+        cta.appendChild(document.createTextNode('Open issue'));
+        cta.appendChild(svgIcon(ICON_RIGHT));
+        ff.appendChild(cta);
+        f.appendChild(ff);
         list.appendChild(f);
         rest = shown.slice(1);
       }
@@ -452,7 +594,12 @@
         var m = el('span', 'row-main');
         m.appendChild(el('span', 'row-lead', e.lead || e.title || e.date));
         if ((e.one_liners || []).length) m.appendChild(el('span', 'row-lines', e.one_liners.join('  \u00B7  ')));
-        if (e.stories) m.appendChild(el('span', 'pill row-n', e.stories + ' stories'));
+        if (e.minutes || e.stories) {
+          var meta = el('span', 'row-meta');
+          if (e.minutes) meta.appendChild(el('span', 'pill', e.minutes + ' min'));
+          if (e.stories) meta.appendChild(el('span', 'pill', e.stories + ' stories'));
+          m.appendChild(meta);
+        }
         a.appendChild(m);
         list.appendChild(a);
       });
@@ -460,14 +607,18 @@
     function load(sec) {
       section = sec;
       list.textContent = '';
-      list.appendChild(el('div', 'state', 'Loading\u2026'));
+      var sk = el('div', 'skel'); sk.setAttribute('aria-hidden', 'true');
+      for (var i = 0; i < 4; i++) sk.appendChild(el('i'));
+      list.appendChild(sk);
       fetchJson(sec.manifest).then(function (data) {
         entries = (Array.isArray(data) ? data : []).slice().sort(function (a, b) {
           return (a.date || '') < (b.date || '') ? 1 : -1;
         });
+        drawStats();
         draw();
       }).catch(function () {
         entries = [];
+        stats.textContent = '';
         list.textContent = '';
         list.appendChild(el('div', 'state', 'The archive could not be loaded. Check your connection and refresh.'));
       });
