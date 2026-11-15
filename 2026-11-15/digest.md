@@ -22,13 +22,13 @@ Who gains: The board has reportedly approached Arm CEO Rene Haas as a potential 
 
 ### 2. Microsoft 365 Outage Knocks Out Email and Teams Globally for a Day
 
-*The Verge · 8 min read · Core*
+*Bloomberg / The Verge · 8 min read · Core*
 
 A network capacity upgrade gone wrong took down Microsoft 365 — Outlook, Teams, Exchange, and related services — for over 24 hours starting November 12, affecting governments, hospitals, traders, and businesses worldwide. Microsoft apologized on November 13, calling it a "technical issue" from a "network capacity upgrade" and confirming it was "not related to cyber or AI/agents." The outage began around 3:00 PM UTC on November 12 and was largely resolved by November 13 afternoon. Bloomberg reported it was one of Microsoft's longest outages. Downdetector showed tens of thousands of user reports at peak. The Verge noted that some customers were still experiencing residual issues on November 14.
 
 Context: Microsoft's cloud reliability has been a selling point against AWS and Google Cloud. This outage, coming six months after a major Azure outage in May, raises questions about redundancy in Microsoft's network architecture. The company's status page initially showed only "service degradation," delaying customer awareness. What to watch: Whether enterprise customers push for contractual SLAs with teeth, if Microsoft discloses the root cause in detail, and whether the outage affects Q2 earnings guidance (Microsoft reports November 19). Unclear: The exact network change that triggered the cascade, why failover mechanisms didn't engage, and the total economic impact.
 
-**Verdict:** Read in full — a rare, prolonged global outage from a hyperscaler that enterprises depend on. [Read the original](https://www.theverge.com/tech/1032518/claude-duet-ai-agent-hands-on)
+**Verdict:** Read in full — a rare, prolonged global outage from a hyperscaler that enterprises depend on. [Read the original](https://www.bloomberg.com/news/articles/2026-11-13/microsoft-says-making-progress-fixing-one-of-its-longest-outages)
 
 ### 3. FAA Expands AI-Powered SMART System to All 22 Air Route Centers Nationwide
 
@@ -42,7 +42,7 @@ Significance: This is the first nationwide deployment of AI-driven air traffic p
 
 ### 4. Anthropic's Dario Amodei Calls Compute the "Deepest Business Dilemma" Ahead of $90B IPO
 
-*Bloomberg · 7 min read · Core*
+*Bloomberg / Business Insider · 7 min read · Core*
 
 Anthropic CEO Dario Amodei told investors at a JPMorgan event on November 13 that deciding how much computing power to buy is the company's "deepest business dilemma" because revenue a year or two out is hard to predict. Under-buy and you can't serve customers or build next-gen models; over-buy and you financially overextend. Amodei said Anthropic "buys on the low side" and tops up on the spot market when demand runs ahead — a premium it only pays when business is doing well. The IPO proceeds widen that buffer.
 
@@ -62,11 +62,11 @@ Significance: This is OpenAI's second attempt at agentic commerce after Instant 
 
 What to watch: Merchant adoption and agent-compatibility fixes, whether United/Amazon hold their blocks, expansion beyond Pro/US, and if transaction fees become a revenue line. Unclear: Per-purchase spending caps, dispute resolution flow for agent-made purchases, and whether "pre-approve" delegation parameters (spending limits, categories, time windows) arrive as promised.
 
-**Verdict:** Read in full — the payments infrastructure piece that could make AI agents economically useful. [Read the original](https://openai.com/index/introducing-chatgpt-wallet)
+**Verdict:** Read in full — the payments infrastructure piece that could make AI agents economically useful. [Read the original](https://openai.com/index/introducing-chatgpt-wallet/)
 
 ### 6. AWS Releases Free Local Emulator of 200+ Services, Written Entirely by AI Agents
 
-*GeekWire / AWS Blog · 5 min read · Core*
+*GeekWire · 5 min read · Core*
 
 AWS announced AWS Emulator on November 11, a free, open-source (CC0) local tool that simulates 200+ AWS services from 438 API models. The striking claim: "The emulator was written entirely by autonomous agents. Our team hasn't written or reviewed any of its code." It runs in Rust on Linux, macOS, and Windows without a network connection or AWS account. The full commit history is on GitHub. AWS says agents also maintain it.
 
@@ -120,13 +120,13 @@ Microsoft announced a Voluntary Exit Offer on October 26 (effective through earl
 
 **Verdict:** Skim — signals Big Tech workforce recalibration amid AI capex, but voluntary and targeted. [Read the original](https://www.geekwire.com/2026/microsoft-makes-new-voluntary-exit-offer-to-more-than-a-quarter-of-its-workforce-including-some-execs)
 
-### 11. Nvidia Employees Petition for Jensen Huang's Return; 100K+ Signatures Including Musk, Sweeney, Tan
+### 11. Italy Fines Meta €805M for Accessing Android Users' Photos Without Consent
 
-*Business Insider / Wired · 3 min read · Worth Knowing*
+*Reuters / BBC · 3 min read · Worth Knowing*
 
-A petition to reinstate Jensen Huang as Nvidia CEO surpassed 100,000 signatures by November 14, including Elon Musk, Epic Games' Tim Sweeney, and Y Combinator's Garry Tan. Organizers claim 5,000+ Nvidia staff signed. The petition argues Huang's ouster was politically motivated and that his leadership is irreplaceable. Nvidia's board has not commented. Separately, Semafor reported the board is considering Arm CEO Rene Haas and Apple's Johny Srouji as successors.
+Italy's data protection agency fined Meta Platforms €805 million ($887 million) on November 14 for allegedly accessing Android users' photos and videos without their consent or informing them. The Garante per la Protezione dei Dati Personali said Meta accessed Android gallery data for use on Facebook and Instagram without a valid legal basis under GDPR. The fine equals about 0.47% of Meta's global revenue. Meta said it will appeal. The decision follows a coordinated investigation with other EU regulators. The agency also ordered Meta to stop the processing and delete the data obtained.
 
-**Verdict:** Skip unless curious — employee petitions rarely reverse board decisions; the successor search is the real signal. [Read the original](https://www.businessinsider.com/petition-reinstate-jensen-huang-nvidia-elon-musk-2026-11)
+**Verdict:** Skim — another significant GDPR enforcement action; adds to Meta's regulatory bill. [Read the original](https://www.reuters.com/world/italy-fines-meta-887-million-over-android-users-data-access-2026-11-14/)
 
 ### 12. Anthropic Releases Mythos 5.2 and Fable 5.2; 20% Price Cut, 30% Faster Outputs
 

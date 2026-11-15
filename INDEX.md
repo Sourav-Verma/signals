@@ -12,3 +12,5 @@
 - AWS releases free local emulator of 200+ services written by AI agents
 - EU proposes Digital Fairness Act targeting dark patterns and addictive design
 - Meta tests internal prediction market 'Takes' with virtual currency
+- Paytm gets RBI in-principle approval to revive digital wallet business
+- Italy fines Meta €805M for accessing Android users' photos without consent
