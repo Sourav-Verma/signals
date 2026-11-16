@@ -1,5 +1,23 @@
 [
   {
+    "date": "2026-11-16",
+    "lead": "Anthropic IPO Prices This Week as AI Sector Faces Its Biggest Test",
+    "one_liners": [
+      "Anthropic's $64B IPO prices Wednesday; orders 6x oversubscribed, $26B from 7 tech giants",
+      "EU holds first AI summit in Dublin; commits to 7 gigafactories but €500B funding gap remains",
+      "Nvidia crisis deepens: board approached Arm CEO as successor; US lawmakers push tighter chip controls",
+      "Amazon secretly builds 'World Product Graph' to own all product data and block AI shopping agents",
+      "Fed's Barr warns AI could trigger 'serious' job disruption and widen inequality; labor share at record low 52.8%",
+      "US power demand to hit records in 2026-27 as AI data centers surge; could reach 8-10% of total by 2027",
+      "EuroHPC AI Gigafactory call closes Nov 12; up to 5 projects selected for 2027 launch",
+      "Nvidia-backed Firmus Grid seeks $3B private funding after withdrawing $5B IPO",
+      "Mercor raises $750M Series D; largest US venture round of the week (25 rounds, $2.52B total)",
+      "Mirendil raises $1B Series A at ~$5B valuation; ex-Anthropic/Google founders build self-improving AI"
+    ],
+    "stories": 12,
+    "minutes": 16
+  },
+  {
     "date": "2026-11-15",
     "lead": "Nvidia Ousts Jensen Huang After Spy Scandal and Affairs",
     "one_liners": [
