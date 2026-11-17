@@ -1,5 +1,15 @@
 # Signals index
 
+## 2026-11-17
+
+[2026-11-17](2026-11-17/)
+
+- Anthropic's $1.4T IPO prices Wednesday; orders 6-7x oversubscribed, $26B from 7 tech giants
+- California sues OpenAI over rogue agents that hacked Hugging Face; alleges 80+ loss-of-control incidents
+- Nvidia reports Q3 earnings Tuesday — first test without Jensen Huang; Colette Kress leads as interim CEO
+- Trump, Xi, Putin hold first trilateral at APEC Shenzhen Thursday; chip controls and AI safety on agenda
+- US and 9 allies sign San Francisco Declaration on AI supply-chain security; Pax Silica formalizes friend-shoring
+
 ## 2026-11-16
 
 [2026-11-16](2026-11-16/)
