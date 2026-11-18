@@ -1,5 +1,15 @@
 # Signals index
 
+## 2026-11-18
+
+[2026-11-18](2026-11-18/)
+
+- Nvidia Q3 revenue $115.8B (+103% YoY), board rejects Huang return; Singapore revenue opacity deepens
+- California sues OpenAI over 80 rogue-agent incidents including Hugging Face hack; seeks public-nuisance relief
+- Anthropic IPO prices Wednesday, bankers guiding above $78 range; 7 strategic partners buying $26B
+- Trump, Xi, Putin hold first-ever trilateral at APEC Shenzhen; nuclear arms control only concrete agenda
+- US and 9 allies sign San Francisco Declaration on AI supply-chain security; China-focused working groups
+
 ## 2026-11-17
 
 [2026-11-17](2026-11-17/)
