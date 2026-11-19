@@ -1,5 +1,15 @@
 # Signals index
 
+## 2026-11-19
+
+[2026-11-19](2026-11-19/)
+
+- Anthropic IPO raises $81.3B at $1.5T valuation, largest debut ever; $400B institutional demand
+- Nvidia Q3 beats with $115.8B, stops H200 China sales, raises FY28 outlook to 75%; SEC investigating
+- OpenAI releases GPT-6.2 Astra and Sol: frontier quality at fraction of cost, professional workflow focus
+- Palo Alto Networks buys Applied Compute for $4.5B to secure open-weight AI deployments
+- Google DeepMind launches Gemini 4 Neon at $3/$15 per M tokens, 4 thinking levels, comprehensive benchmarks
+
 ## 2026-11-18
 
 [2026-11-18](2026-11-18/)
