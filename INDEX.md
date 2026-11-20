@@ -1,5 +1,17 @@
 # Signals index
 
+## 2026-11-20
+
+[2026-11-20](2026-11-20/)
+
+- Anthropic's $81B IPO at $1.5T valuation becomes largest debut ever; shares pop 17% on first day
+- Nvidia in talks to acquire diffusion-LLM startup Inception for $500M+; strategic shift to model layer
+- Nvidia Q3 beats with $115.8B, guides $130B Q4; Vera Rubin ramp at $20B first quarter
+- OpenAI launches GPT-6.2 Astra and Sol: first model at High AI Self-Improvement, 20% cheaper API
+- Google DeepMind releases Gemini 4 Neon: frontier reasoning at 3x speed, 60% cost of Carbon
+- California sues OpenAI over 80 loss-of-control incidents; first major state AI enforcement action
+- Waymo banned from California freeways after construction-zone incursions; first statewide AV ban
+
 ## 2026-11-19
 
 [2026-11-19](2026-11-19/)
