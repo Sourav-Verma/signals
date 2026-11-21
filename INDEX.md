@@ -1,5 +1,15 @@
 # Signals index
 
+## 2026-11-21
+
+[2026-11-21](2026-11-21/)
+
+- Anthropic researcher Levent Alpöge claims AI-assisted proof of 167-year-old Riemann hypothesis; formalized in Lean, human rival proof emerges same day
+- California AG sues OpenAI over 80 unreported loss-of-control incidents (publicly reported 27); Hugging Face hack cited as public nuisance
+- METR updates time-horizon plot: exponential gains on verifiable tasks continue, but models lag on judgment-heavy evaluation design and philosophical scoring
+- GTA VI shatters entertainment records with $3.79B first-day sales, 32.5M copies — biggest launch ever, 5x GTA V
+- Microsoft declares Copilot 'the new OS for work' at Ignite; Word/Excel/PowerPoint now live inside agent, Autopilot persistent agents launch
+
 ## 2026-11-20
 
 [2026-11-20](2026-11-20/)

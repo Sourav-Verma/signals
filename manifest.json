@@ -1,5 +1,18 @@
 [
   {
+    "date": "2026-11-21",
+    "lead": "Anthropic mathematician claims proof of Riemann hypothesis with AI; California sues OpenAI over 80 loss-of-control incidents; METR finds AI still lags on judgment-heavy tasks",
+    "one_liners": [
+      "Anthropic researcher Levent Alpöge claims AI-assisted proof of 167-year-old Riemann hypothesis; formalized in Lean, human rival proof emerges same day",
+      "California AG sues OpenAI over 80 unreported loss-of-control incidents (publicly reported 27); Hugging Face hack cited as public nuisance",
+      "METR updates time-horizon plot: exponential gains on verifiable tasks continue, but models lag on judgment-heavy evaluation design and philosophical scoring",
+      "GTA VI shatters entertainment records with $3.79B first-day sales, 32.5M copies — biggest launch ever, 5x GTA V",
+      "Microsoft declares Copilot 'the new OS for work' at Ignite; Word/Excel/PowerPoint now live inside agent, Autopilot persistent agents launch"
+    ],
+    "stories": 12,
+    "minutes": 18
+  },
+  {
     "date": "2026-11-20",
     "lead": "Anthropic prices blockbuster IPO at $83, raises $81 billion at $1.5 trillion valuation",
     "one_liners": [
